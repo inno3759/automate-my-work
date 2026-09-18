@@ -164,3 +164,31 @@ Report: "Installed and checked: Python, Node. Nothing else changed."
 ```
 Create it with `uv init --app` for Python deliverables (`uv add requests
 python-dotenv` etc.). One folder per automation; never mix.
+
+## Keep the skill itself up to date (once per session, step 0)
+
+Two install shapes exist; detect which one you are in from the folder this
+`SKILL.md` was read from (`${CLAUDE_SKILL_DIR}` when the harness sets it,
+otherwise `~/.claude/skills/automate-my-work`, resolving symlinks).
+
+| Shape | Check (silent, ≤ 3 s, skip if offline) | Update (only after the user says yes) |
+|-|-|-|
+| **plugin from the marketplace** (`${CLAUDE_PLUGIN_ROOT}` is set, or `claude plugin list` shows `automate-my-work@inno3759`) | `claude plugin list` shows the installed version; compare with `curl -fsSL https://raw.githubusercontent.com/inno3759/automate-my-work/main/VERSION` | `claude plugin update automate-my-work@inno3759` |
+| **git clone** (`.git/` exists) | `git -C "$D" fetch -q && git -C "$D" log --oneline HEAD..@{u}` — one line per pending update | `git -C "$D" pull --ff-only` |
+| **ZIP / uploaded** (no `.git/`) | compare `cat "$D/VERSION"` with `curl -fsSL https://raw.githubusercontent.com/inno3759/automate-my-work/main/VERSION` (PowerShell: `irm <url>`) | Claude Code: `git clone` over the folder (move the old one aside). Claude Desktop: download the ZIP again and re-upload it in *Settings → Capabilities → Skills* — you cannot do this for them; give the two clicks |
+
+Rules:
+- **Never update silently.** Show the pending lines (or "version X → Y")
+  and ask in one sentence: "This helper has 2 improvements (better login
+  handling). Update now? 5 seconds, then a new conversation." A skill
+  that changes under the user mid-task is a bug, not a feature.
+- **Local edits win.** If `git status --porcelain` is not empty, or
+  `pull --ff-only` refuses, say so and stop; do not stash, reset or merge.
+- **Check once per session, at step 0**, never in the middle of a build.
+  Offline or fetch error → say nothing and continue.
+- After updating: the new files load in the **next** session; finish the
+  current task with what is loaded.
+- `VERSION`, `metadata.version` in SKILL.md and `.claude-plugin/plugin.json`
+  carry the same string, bumped on every release commit: `YYYY.M.D`
+  (semver, so no leading zeros; a second release the same day appends
+  `-2`).

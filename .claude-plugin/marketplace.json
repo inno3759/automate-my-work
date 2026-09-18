@@ -1,0 +1,13 @@
+{
+  "name": "inno3759",
+  "owner": { "name": "inno3759" },
+  "description": "Skills and plugins by inno3759",
+  "plugins": [
+    {
+      "name": "automate-my-work",
+      "source": "./",
+      "description": "Turns a non-technical person's repetitive daily work into automation that runs without an LLM in the loop. Audits automations they already have.",
+      "category": "productivity"
+    }
+  ]
+}

@@ -56,13 +56,17 @@ Consequences baked into every file:
 
 ```
 automate-my-work/
-├── SKILL.md                  entry point; the workflow Claude follows (≤ ~200 lines)
+├── SKILL.md                  entry point; the workflow Claude follows (official guidance: under 500 lines)
 ├── README.md                 two audiences: humans (top) + the installing agent (collapsible)
 ├── CLAUDE.md                 this file
 ├── LICENSE                   MIT
+├── VERSION                   YYYY.M.D release stamp (semver); ZIP installs compare it with GitHub to detect updates
+├── .claude-plugin/           plugin.json (name, version, license) + marketplace.json (this repo is its own marketplace `inno3759`, source "./")
+├── evals/                    `claude plugin eval .` cases: 3 trigger phrasings that must fire the skill + 1 unrelated prompt that must not
 ├── .gitignore                __pycache__, .env, data/, logs/
 ├── references/               loaded on demand; each is self-contained
-│   ├── setup.md              probe commands per OS → the nudge → install table → verify → project folder layout
+│   ├── setup.md              probe commands per OS → the nudge → install table → verify → project folder layout → keep the skill itself updated
+│   ├── audit.md              existing automations: read/run first, 19-row shortcut checklist, rank risk×frequency÷effort, one fix at a time, same-input-same-output proof
 │   ├── discovery.md          5-question interview, Playwright recording, machine inspection, opportunity map, 5-line spec
 │   ├── network-first.md      capture → replay by hand → trace the dependency chain backwards → auth patterns → reading responses → decision rule → good citizen
 │   ├── delivery-forms.md     decision table + checklists: userscript, extension, Python script, GUI, shortcut, Playwright
@@ -86,7 +90,8 @@ automate-my-work/
 
 ### How the workflow runs (SKILL.md)
 -1. **Triage** — any build/get/check/fetch request touching a site, app, sheet or mailbox: do it, then (if there is a request behind the clicks AND it will recur) offer the self-running version in one line, once. Accepted → step 0 with mini discovery. The user will not say "automate" or "scraping"; the skill must notice.
-0. **Capability check + nudge** — probe, say what each missing tool unlocks, install, verify. Mandatory, every time.
+0. **Capability check + nudge** — first, once per session, check whether the skill itself has updates (`git fetch`/`log HEAD..@{u}`, or `VERSION` vs GitHub for ZIP installs) and offer them in one line; never pull silently or over local edits (`setup.md` §"Keep the skill itself up to date"). Then probe, say what each missing tool unlocks, install, verify. Mandatory, every time.
+0b. **Audit** — they already have a script/macro/flow (or one is found on the machine): read and run it once, walk `audit.md`'s checklist, show ≤ 5 findings in their words, fix one at a time with their yes, prove same input → same output. Working code is the asset; no rewrites for style.
 1. **Discovery** — interview → record one real pass → inspect the machine → opportunity map (ranked by minutes saved × determinism, max 5, at least one unrequested) → 5-line spec agreed with the user. "Impossible" walls → `unblockers.md`.
 2. **Observe** — HAR → the request behind each click → replay with curl → strip headers → learn what the session is bound to → decision rule (HTTP script / userscript / extension / Playwright).
 3. **Build** — templates; idempotent; 3 bins; loud single failure; `.env`; plain-language logs; `--dry-run`.
@@ -107,10 +112,11 @@ automate-my-work/
 
 ## 5. Conventions
 
-- **SKILL.md ≤ ~240 lines.** Anything longer moves to `references/`. The description in the frontmatter is the trigger: keep the phrases users actually say ("I do this every day", "can this be automatic?") AND the build/get/check phrasings of people who do not know automation exists ("pega os dados do site X", "me avisa quando mudar") — the skill must fire on the task, not only on the word "automate".
+- **SKILL.md under 500 lines** (official Claude Code guidance). Move detail to `references/` only when it is not needed on every run. The description in the frontmatter is the trigger: keep the phrases users actually say ("I do this every day", "can this be automatic?") AND the build/get/check phrasings of people who do not know automation exists ("pega os dados do site X", "me avisa quando mudar") — the skill must fire on the task, not only on the word "automate".
 - **Each reference is self-contained** and can be read alone; cross-reference by file name and section (`gotchas.md §2`).
 - **Templates**: Python ≥ 3.12, type hints, `from __future__ import annotations`, docstring at the top saying how to install deps and run, `TODO` marks exactly what must be filled. They must compile without the optional deps installed (imports of playwright/mcp/fastapi/pyotp are fine at module level only in files whose sole purpose needs them).
 - **Prose**: rules stated as rules, one incident line for the "why". Tables over paragraphs. No site names, no personal names.
+- **Releases**: bump `VERSION`, `metadata.version` in the SKILL.md frontmatter and `version` in `.claude-plugin/plugin.json` (all equal; `YYYY.M.D`, semver so no leading zeros, `-2` for a second release the same day) in every commit that changes SKILL.md, references or templates — ZIP installs detect updates only through it.
 - **Commits**: `feat|fix|docs: short description`. Author is the anonymous GitHub identity. No `.env` in this repo (the skill has no secrets); user automations get their own `.env` + `.env.example`.
 - **README** has two audiences; the collapsible "Instructions for the agent" must always match SKILL.md step 0 and the install paths.
 
@@ -118,10 +124,13 @@ automate-my-work/
 
 Before every commit:
 ```bash
+claude plugin validate . && grep -q "$(cat VERSION)" SKILL.md .claude-plugin/plugin.json && echo versions ok
 python3 -m py_compile templates/*.py && rm -rf templates/__pycache__
 node -e "const fs=require('fs');for(const f of ['templates/userscript.user.js','templates/extension/background.js','templates/extension/content.js'])new Function(fs.readFileSync(f,'utf8'));JSON.parse(fs.readFileSync('templates/extension/manifest.json'));console.log('js ok')"
-grep -rnoIE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}|https?://[^ )]+' . | grep -vE 'example\.com|127\.0\.0\.1|astral\.sh|nodesource|apple\.com|api\.telegram|github\.com/inno3759/automate-my-work' ; echo "identity scan: e-mails/links above must be empty; also grep your own name, domains and IPs from a list kept OUTSIDE the repo"
+grep -rnoIE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}|https?://[^ )]+' . | grep -vE 'example\.com|127\.0\.0\.1|astral\.sh|nodesource|apple\.com|api\.telegram|githubusercontent\.com/inno3759/automate-my-work|github\.com/inno3759/automate-my-work' ; echo "identity scan: e-mails/links above must be empty; also grep your own name, domains and IPs from a list kept OUTSIDE the repo"
 ```
+Trigger test: `claude plugin eval .` runs `evals/` (3 phrasings that must fire the skill, 1 unrelated prompt that must not) against a no-plugin baseline; a failing `skill-fired` grader means the description lost a trigger phrase. Costs real model runs; run it before a release, not on every edit.
+
 Real test (the one that matters): run the skill with a non-technical user
 (or role-play one) on a Windows/Mac machine with nothing installed. Watch
 step 0 (does the nudge read naturally? did the install succeed?), step 1
@@ -134,6 +143,7 @@ picked up.
 
 ## 7. Distribution
 
+- Install paths: marketplace (`claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759`, updates via `claude plugin update`), git clone into `~/.claude/skills/` (loads as `automate-my-work@skills-dir`; slash name becomes `/automate-my-work:automate-my-work`, model invocation unchanged), or ZIP upload for Claude Desktop.
 - GitHub: `inno3759/automate-my-work`, **public** since 2026-09-18, single-commit
   history (recreated after an identity scan). Never push without the scan;
   author is always the anonymous `inno3759` noreply identity; no AI

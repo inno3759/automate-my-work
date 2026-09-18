@@ -1,6 +1,10 @@
 ---
 name: automate-my-work
-description: Turn a non-technical person's repetitive daily work (point-and-click in websites, copy-paste between systems, "every Monday I download X and paste into Y") into automation that runs WITHOUT an LLM in the loop — userscripts, browser extensions, Python scripts, scheduled services, tiny GUIs and desktop shortcuts. Prefers replaying the HTTP requests behind the clicks over driving a browser. Probes the machine first and always tells the user what installing uv/Python, Node, Playwright, Violentmonkey or an MCP would unlock, then installs it for them. Shows the way around "impossible" walls (2FA/OTP secret from the QR, captcha ladder, app-only data, scanned PDFs) and turns finished tools into building blocks (local API, MCP server for Claude, LLM-ready outputs). Use when someone says "I do this every day/week", "can this be automatic?", "I keep clicking…", or asks for a bot/macro/script for their job, or when you notice a repeated manual task while helping them. ALSO use — quietly, as a triage — whenever someone asks to build/make/get/check/fetch/download/monitor/compare something from a website, portal, app, spreadsheet, e-mail or other system ("pega os dados do site X", "me avisa quando mudar", "check if the page changed", "build me something that reads…", "download the report and put it in the sheet"), even a one-off request and even if they never say automate, bot or scraping: do what was asked, then offer the self-running version in one line if it will recur.
+description: Turn repetitive daily work (clicking through websites, copy-paste between systems, weekly downloads) into automation that runs WITHOUT an LLM in the loop — userscripts, browser extensions, Python scripts, scheduled services, tiny GUIs. Replays the HTTP requests behind the clicks instead of driving a browser; probes the machine and installs what is missing; gets around 2FA, captchas, app-only data and scanned PDFs; audits and hardens automations the person already has. Use when someone says "I do this every day/week", "can this be automatic?", "I keep clicking…", asks for a bot/macro/script, or already has one that is slow, fragile or broke. ALSO use, quietly, whenever someone asks to build/get/check/fetch/download/monitor/compare something from a website, portal, app, spreadsheet or e-mail ("pega os dados do site X", "me avisa quando mudar", "check if the page changed"), even one-off: do what was asked, then offer the self-running version in one line if it will recur.
+license: MIT
+metadata:
+  version: "2026.9.18"
+  repo: https://github.com/inno3759/automate-my-work
 ---
 
 # automate-my-work
@@ -125,11 +129,32 @@ Same for permission prompts: if they ask how to stop being asked before
 every action, `references/setup.md` §"Fewer confirmations" has the
 official settings; explain the trade, they decide and apply it.
 
+**Is this skill itself current?** Once per session, before the probe:
+`references/setup.md` §"Keep the skill itself up to date". Marketplace
+install → `claude plugin update`; git clone → `git fetch` + `log
+HEAD..@{u}`; ZIP install → compare `VERSION` with the one on GitHub.
+Pending updates → one line with what changed, ask, then update (or the
+two clicks to re-upload the ZIP). Never
+silently; never over local edits; offline → skip without comment.
+
 Install order (only what the chosen solution needs): **MCP that gives
 Claude hands** (Desktop only) → **uv** (brings Python) → **Node LTS** →
 **Playwright + Chromium** (only if recording/driving a browser) →
 **Violentmonkey** in the browser they already use → task-specific **MCP
 servers**. Windows: PowerShell + winget, not WSL, unless WSL exists.
+
+### 0b. They already have something? Audit before building
+
+"I have a script that…", "my bot broke", a macro, a Power Automate /
+Zapier / n8n flow, a Tampermonkey script — or you find one on the
+machine in step 1. Do not rewrite it. Follow `references/audit.md`:
+read and run it once, walk the shortcut checklist (browser where a
+request would do, sleeps, screen coordinates, LLM for deterministic
+steps, no dedupe key, collapsed failure bins, silent, secrets in code,
+login every run, no scheduler/lock, destructive without confirm), rank
+by risk × frequency ÷ effort, show at most 5 in their words, fix one at
+a time with their yes, and prove same input → same output after each.
+Working code is the asset; style is not a finding.
 
 ### 1. Discovery — understand the day, not the request
 
@@ -139,7 +164,8 @@ Playwright recorder (`templates/record_session.py`) — it saves a HAR, the
 storage state and a screenshot per step. Also look at what is already on the
 machine: bookmarks, Downloads folder patterns, recent files, open tabs,
 Excel files with dates in the name. These reveal the routines they did not
-mention.
+mention. An existing script, macro, flow or scheduled task → step 0b
+(`references/audit.md`) before proposing anything new around it.
 
 Many routines, a team, or "I don't know where the time goes"?
 Log events for a week and let the data point at the bottleneck —
@@ -276,7 +302,7 @@ section at the end with the opportunities they did not pick.
 
 ## Files in this skill
 
-`references/`: setup (install per OS) · discovery (interview, recording,
+`references/`: setup (install per OS, keep the skill updated) · audit (checklist for automations they already have) · discovery (interview, recording,
 worth-it filter, cheap process mining, heuristics) · network-first (find and replay the request) · delivery-forms
 (pick the surface) · scheduling (timers/services/shortcuts) · gotchas
 (sessions, forms, dedupe, bot managers, LLM policy) · unblockers (blocked
