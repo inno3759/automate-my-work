@@ -68,6 +68,44 @@ minutes saved per week and the shape ("button on the page", "runs every
 morning", "drag file here"). Include at least one they did not mention.
 Let them pick; start with the one that is both valuable and deterministic.
 
+## 4b. Is it worth automating? (run every candidate through this filter)
+
+Bad automation does not feel broken; it feels productive. Things move,
+tasks disappear, dashboards look nicer — and a week later the user is
+reviewing output that did not need to exist, or trusting something they
+should not. Before a candidate goes on the map, answer these; a "no" on
+any of the first three means **leave it manual, on purpose, and say why**.
+
+Two overrides, in this order:
+
+- **The user explicitly asked to automate it → automate it.** The filter
+  is for candidates *you* propose, not a gate on their request. If a test
+  fails, build it anyway with the safety it implies (a "review before
+  send" step, `--dry-run`, an undo), say in one line what you added and
+  why, and move on. Never refuse or stall a clear request with this table.
+- **Recurrence is the trigger, not a count.** Nothing below is a hard
+  threshold. If it happens every month, every quarter, every time a
+  client arrives, or if you can reasonably presume they will do it again
+  ("todo mês eu faço isso", the same site as an earlier request, a date
+  in a file name, a task that is obviously part of their job) — offer
+  the automation. Monthly and painful beats daily and trivial.
+
+| Test | Ask | Automate when |
+|-|-|-|
+| **Flow, not decision** | Is the step "if A → do B", or does it need context, nuance, accountability? | clear path, few surprises, mistakes cheap, output easy to verify. Data moving, reminders, statuses, syncing, "draft-level" tags/priority: yes. Judgment calls: no — or produce a draft the human approves. |
+| **Silent failure** | If this ran wrong silently, how fast would they notice, and how bad is it? | "quickly" and "cheap". If "not quickly" or "pretty bad": keep a human checkpoint (`--dry-run`, "review before send"). |
+| **Reversible** | Can a person spot a wrong move and undo it? | yes. If not, the tool prepares and the human presses "send". |
+| **Leverage** | Does it shorten a cycle (lead → meeting → payment), cut losses (missed calls, forgotten follow-ups), or raise quality — or does it save 3 clicks and add a layer of checking? | leverage. A "looks nice" automation that creates review work is clean-looking chaos. |
+| **Still wanted** | "If this ran perfectly, would you still want the output?" | yes. If the honest answer is "I would not read it", drop it. |
+| **Recurrence × pain** | Will it happen again — daily, weekly, monthly, every new client? Does it feel like a chore? Acceptable deviation if done by hand? | it recurs, on any cadence, or you can presume it will; more so if it is a chore or must come out identical every time. |
+| **Maintenance** | Who fixes it when the site changes next month? | the gain covers the upkeep; otherwise a userscript button (cheap to fix) beats a service. |
+
+Guard the thinking, not the effort: a step that exists to catch bad
+inputs, validate an assumption or force a decision must stay where a
+human sees it. Automating it hides the problem instead of solving it.
+The good automations move human effort to the exact point where it
+matters and are boringly reliable, not impressive.
+
 ## 5. Write the spec (5 lines, agree before building)
 
 ```
@@ -78,3 +116,39 @@ Writes: <file/system/message>
 Done when: <observable result the user checks>
 Never: <the destructive action it must not do without confirmation>
 ```
+
+## 6. Process mining, the cheap version (when the day is too big to map by hand)
+
+Enterprises pay for "process mining": collect timestamps of events from
+the tools a team uses, and let the data draw the process and point at the
+bottleneck. The same idea costs nothing and is the right first move when
+the user (or their team) has **many routines, several systems, or cannot
+say where the time goes** — a judgment call, not a count. Offer it in their words: "instead of
+guessing, we log for one week what happens when, and the log tells us
+what to automate first".
+
+How, with what is already there:
+
+1. **Pull event logs you already have**, read-only: e-mail headers
+   (sent/received time, subject), calendar, ticket/CRM history exports
+   (status changes with timestamps), the system's own audit/history tab,
+   file mtimes in Downloads/Documents, browser history export. Each row
+   becomes `case_id, activity, timestamp, who, system`.
+2. **Where no log exists, add a one-key logger** for one week: a
+   userscript button "started/finished X" on the pages they use, or a
+   tiny GUI (`templates/gui_tk.py`) with 5 buttons that appends a line to
+   a CSV. Thirty seconds of the user's time per day.
+3. **Analyze with pandas** (or a spreadsheet pivot): per case, the
+   sequence of activities and the wait between them. Output three lists:
+   most frequent paths (the real process, not the described one), longest
+   waits between steps (the bottleneck — usually a hand-off or a
+   "check if something arrived"), and rework loops (the same activity
+   repeated per case). `pm4py` draws the process graph if a picture helps.
+4. **Feed §4 with numbers**: minutes per week now come from the log, not
+   from memory. The top waits become the top candidates — typically
+   watchers ("tell me when it arrives") and hand-offs ("move it to the
+   next system"), which are also the most deterministic.
+
+Keep it read-only, anonymous (`who` = role, not name) and time-boxed
+(one or two weeks). It is a discovery tool, not a monitoring system: say
+so, and delete the logger when the map is done.

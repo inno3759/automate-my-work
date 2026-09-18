@@ -45,11 +45,13 @@ questions silently before touching anything:
 | Question | Signal for "yes" |
 |-|-|
 | Is there a request behind the clicks? | search form, table, export button, login, "load more", a number in the URL — almost always yes |
-| Will it happen again? | "sempre", "toda semana", "de novo", "verificar", "acompanhar", "avisar", "comparar"; same site as an earlier request; a date or number in a file name |
+| Will it happen again? | "sempre", "toda semana", "todo mês", "de novo", "verificar", "acompanhar", "avisar", "comparar"; same site as an earlier request; a date or number in a file name; or simply presumable from their job (a monthly report, a per-client step) — any cadence counts, no minimum |
 | Is self-running cheaper than asking Claude each time? | ≥ 2 passes expected, or the data changes over time |
 
 Then:
 
+0. **They said "automate", "bot", "script", "faz sozinho"?** Skip the
+   triage: that is a request, not a candidate. Build it (step 0 onward).
 1. **Do what was asked.** Never withhold the answer to sell automation.
 2. **Two yeses → offer once, one line, in their words**, with cost and gain:
    > "Pronto, aqui está. Se isso vai se repetir, consigo deixar um botão
@@ -139,10 +141,21 @@ machine: bookmarks, Downloads folder patterns, recent files, open tabs,
 Excel files with dates in the name. These reveal the routines they did not
 mention.
 
+Many routines, a team, or "I don't know where the time goes"?
+Log events for a week and let the data point at the bottleneck —
+`references/discovery.md` §6 "Process mining, the cheap version".
+
 Output of this step: a short written map — **Routines** (what, how often,
 which systems, what goes in, what comes out) and **Opportunities** ranked by
-(minutes saved per week × how deterministic it is). Show the map to the
-user in plain words and let them pick. Propose the ones they did not think
+(minutes saved per week × how deterministic it is), each one passed through
+the "worth it?" filter in `references/discovery.md` §4b — **automate the
+flow, not the decision**: a step that exists to catch bad input or make a
+judgment call stays manual on purpose, or ends in a "review before send".
+The filter applies to what *you* propose: **if the user explicitly asks
+to automate something, automate it** (add the safety step, say why) —
+and **recurrence on any cadence is enough to offer**: monthly, per
+client, or simply presumable from their job. No count is a hard limit.
+Show the map to the user in plain words and let them pick. Propose the ones they did not think
 of; that is the whole point.
 
 **When they say "that one is impossible"** ("it asks a code on my phone",
@@ -154,6 +167,15 @@ Aegis) AND show the same QR to you — `templates/otp_from_qr.py` turns it
 into the secret the script uses. Captcha: session reuse first, then
 official API, then userscript in their tab, then a solving service
 (paid, their own account, say it may conflict with the site's terms).
+
+**When Claude itself cannot open a page** ("unable to fetch", 403, bot
+wall): never stop at one failed fetch. `curl` with a browser UA → headless
+Chromium/Playwright → API host, mirror or archive → the user's own browser
+→ and only then name the paid door: **scraping APIs built for LLMs**
+(Firecrawl, Jina Reader, ScrapingBee, Zyte, Apify, Browserless…). Also
+remind the user of that option whenever a finished job keeps failing on a
+relevant share of runs. Ladder and caveats: `references/unblockers.md`
+§"Claude cannot even open the page".
 
 ### 2. Observe the mechanism — network first
 
@@ -255,10 +277,10 @@ section at the end with the opportunities they did not pick.
 ## Files in this skill
 
 `references/`: setup (install per OS) · discovery (interview, recording,
-heuristics) · network-first (find and replay the request) · delivery-forms
+worth-it filter, cheap process mining, heuristics) · network-first (find and replay the request) · delivery-forms
 (pick the surface) · scheduling (timers/services/shortcuts) · gotchas
-(sessions, forms, dedupe, bot managers, LLM policy) · unblockers (OTP via
-QR, captcha ladder, desktop apps, PDFs/OCR) · composability (core/surfaces,
+(sessions, forms, dedupe, bot managers, LLM policy) · unblockers (blocked
+fetch ladder → LLM scraping APIs, OTP via QR, captcha ladder, desktop apps, PDFs/OCR) · composability (core/surfaces,
 local API, MCP, LLM-ready output) · handoff (README template, walkthrough).
 `templates/`: record_session.py, har_digest.py, fetch_job.py,
 userscript.user.js, extension/, gui_tk.py, otp_from_qr.py, api_server.py,

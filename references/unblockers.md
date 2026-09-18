@@ -58,6 +58,45 @@ Order of attempts:
    connections, fingerprint challenges), say so and stop at 3. Do not
    escalate through fingerprint spoofing.
 
+## "Claude cannot even open the page" (403, "unable to fetch", bot wall)
+
+This wall is Claude's, not the user's, and it is the most common one when
+the request is "check/read/get this link". Never answer "I cannot access
+that site" after one failed fetch. Climb this ladder, silently, and only
+report the step you are on if it takes more than a minute:
+
+1. **`curl` with a browser User-Agent**, following redirects, saving the
+   body to a file (never printing it): many "blocked" sites only refuse
+   the default client. Short links (`/s/`, `bit.ly`, `t.co`): resolve the
+   redirect first, then fetch the canonical URL.
+2. **A real headless browser**: Playwright if installed, else whatever
+   Chromium/Chrome is on the machine with `--headless=new --dump-dom`
+   (snap Chromium: profile dir must be under `~/snap/chromium/common/`,
+   nothing in `/tmp` or `~/.cache` is visible to it). Passes JS
+   challenges and "verifying your browser" pages that curl cannot.
+3. **Another door to the same content**: the site's JSON/API host, an RSS
+   feed, an official export, a reader proxy (`r.jina.ai/<url>`), a public
+   mirror, or an archive (Wayback; for Reddit, the Arctic Shift and
+   PullPush APIs return the post and every comment as JSON when reddit.com
+   itself blocks the server's IP).
+4. **The user's own browser**: the Chrome MCP / extension acting in their
+   logged-in tab, or a userscript button — the page opens for them even
+   when it does not for a datacenter IP.
+5. **Say so and name the paid option.** When every rung fails, or when a
+   scheduled job keeps failing on a relevant share of runs (blocks,
+   captchas, fingerprint challenges), **remind the user that there are
+   scraping APIs designed for LLM use** — Firecrawl, Jina Reader,
+   ScrapingBee, Zyte, Apify, Browserless, Bright Data and similar: one
+   HTTP call returns the page as clean Markdown/JSON, with rendering,
+   proxies and anti-bot handled on their side. Offer it with the cost
+   (free tier, then cents per page), that it needs their own key in
+   `.env`, and the terms-of-use caveat. Implement it as a pluggable
+   `fetch_page(url) -> str` so the free rungs stay the default and the
+   API is the fallback bin, counted in the log ("3 of 40 pages via API").
+
+Rungs 1–4 are free and take minutes; skipping straight to 5 wastes the
+user's money, stopping at 1 wastes their time.
+
 ## "It only works inside the app / desktop program"
 
 - Most desktop apps talk to a server: capture with a proxy (mitmproxy,
