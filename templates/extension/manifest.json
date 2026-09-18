@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "TODO Task name",
+  "version": "1.0.0",
+  "description": "Does the repetitive part on TODO site, and checks for news every 30 minutes.",
+  "permissions": ["storage", "alarms", "activeTab", "notifications"],
+  "host_permissions": ["https://example.com/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{ "matches": ["https://example.com/some/page*"], "js": ["content.js"], "run_at": "document_idle" }],
+  "action": { "default_title": "TODO Task name" }
+}

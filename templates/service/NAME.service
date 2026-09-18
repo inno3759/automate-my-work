@@ -1,0 +1,11 @@
+# ~/.config/systemd/user/NAME.service — replace NAME; wrapper does cd + uv run
+[Unit]
+Description=Automation NAME
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/Automations/NAME/run.sh
+WorkingDirectory=%h/Automations/NAME
+StandardOutput=append:%h/Automations/NAME/logs/service.log
+StandardError=append:%h/Automations/NAME/logs/service.log

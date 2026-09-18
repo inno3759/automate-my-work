@@ -1,0 +1,12 @@
+# ~/.config/systemd/user/NAME.timer
+# systemctl --user daemon-reload && systemctl --user enable --now NAME.timer && loginctl enable-linger $USER
+[Unit]
+Description=Run NAME on schedule
+
+[Timer]
+OnCalendar=Mon..Fri 08:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
