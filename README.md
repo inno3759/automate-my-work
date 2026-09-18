@@ -17,32 +17,20 @@ Buttons on the pages you already use · scripts that run every morning · tiny a
 Copy the block below and send it to Claude (Claude Code, Claude Desktop with computer access, or any agent that can run commands):
 
 ```text
-Install the Claude skill from https://github.com/inno3759/automate-my-work
+Install the Claude plugin from https://github.com/inno3759/automate-my-work
 and then start it: look at what I do every day and propose what you could automate.
 ```
 
 <details>
 <summary><b>Instructions for the agent</b> (Claude: read this section and do it, do not ask the user to)</summary>
 
-1. Find the skills folder for this environment:
-   - **Claude Code** (CLI / VS Code / desktop app): `~/.claude/skills/` (Windows: `%USERPROFILE%\.claude\skills\`). Project-only install: `<project>/.claude/skills/`.
-   - **Claude Desktop / claude.ai custom skills**: download the ZIP of this repository (`Code → Download ZIP`, or `gh repo archive`), then upload it in *Settings → Capabilities → Skills*. The folder must contain `SKILL.md` at its root.
-2. **Claude Code, preferred** (gets updates through `claude plugin update`):
+1. **Claude Code** (CLI / VS Code / desktop app) — install the plugin; updates then come through `claude plugin update`:
    ```bash
    claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759
    ```
-   **Alternative**: clone (or update) into the skills folder; it loads as a skills-directory plugin:
-   ```bash
-   git clone https://github.com/inno3759/automate-my-work "$HOME/.claude/skills/automate-my-work" \
-     || git -C "$HOME/.claude/skills/automate-my-work" pull --ff-only
-   ```
-   PowerShell:
-   ```powershell
-   git clone https://github.com/inno3759/automate-my-work "$env:USERPROFILE\.claude\skills\automate-my-work"
-   ```
-   No `git`? Download the ZIP and extract it so that `…/skills/automate-my-work/SKILL.md` exists.
-   **Updating later**: the skill checks for updates itself at the start of each session and asks before pulling. To force it: `claude plugin update automate-my-work@inno3759` (marketplace install) or `git -C "$HOME/.claude/skills/automate-my-work" pull --ff-only` (PowerShell: `git -C "$env:USERPROFILE\.claude\skills\automate-my-work" pull --ff-only`); ZIP installs re-download and re-upload (the `VERSION` file says which release you have).
-3. Verify: `SKILL.md` is at `…/skills/automate-my-work/SKILL.md`. Restart Claude Code (or start a new session) so the skill is listed.
+   Same command in PowerShell. Verify with `claude plugin list` (shows `automate-my-work@inno3759`), then start a new session.
+2. **Claude Desktop / claude.ai** (no plugin support there — custom skill upload): download the repository ZIP (`Code → Download ZIP`), extract it, zip the folder `skills/automate-my-work` (it has `SKILL.md` at its root) and upload that in *Settings → Capabilities → Skills*.
+3. **Updating later**: the plugin checks for updates itself at the start of each session and asks before doing anything. To force it: `claude plugin update automate-my-work@inno3759`. Desktop uploads: repeat step 2 (the `VERSION` file inside the folder says which release you have).
 4. Start it: invoke the skill `automate-my-work`. Its first step is a **capability check** — it will probe the machine and tell the user, in plain words, what installing uv/Python, Node, Playwright, Violentmonkey or an MCP would unlock, and offer to install it. Do not skip that step; do not skip discovery.
 5. Tell the user in one line: "Installed. I'll now ask five short questions about your day."
 

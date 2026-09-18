@@ -129,13 +129,12 @@ Same for permission prompts: if they ask how to stop being asked before
 every action, `references/setup.md` §"Fewer confirmations" has the
 official settings; explain the trade, they decide and apply it.
 
-**Is this skill itself current?** Once per session, before the probe:
-`references/setup.md` §"Keep the skill itself up to date". Marketplace
-install → `claude plugin update`; git clone → `git fetch` + `log
-HEAD..@{u}`; ZIP install → compare `VERSION` with the one on GitHub.
-Pending updates → one line with what changed, ask, then update (or the
-two clicks to re-upload the ZIP). Never
-silently; never over local edits; offline → skip without comment.
+**Is this plugin itself current?** Once per session, before the probe:
+`references/setup.md` §"Keep the plugin itself up to date". Claude Code
+→ `claude plugin update`; Claude Desktop ZIP → compare `VERSION` with the
+one on GitHub. Pending update → one line with what changed, ask, then
+update (or the two clicks to re-upload). Never silently; never over the
+maintainer's local edits; offline → skip without comment.
 
 Install order (only what the chosen solution needs): **MCP that gives
 Claude hands** (Desktop only) → **uv** (brings Python) → **Node LTS** →

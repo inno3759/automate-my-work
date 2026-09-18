@@ -6,11 +6,13 @@ to change it safely, and where it stands.
 
 ## 1. What this is
 
-A **distributable Claude skill**. This repository IS the skill: `SKILL.md`
-at the root, `references/` loaded on demand by the model, `templates/`
-copied into the user's own automation folder. Installing = cloning into
-`~/.claude/skills/automate-my-work` (or uploading the ZIP to Claude
-Desktop's Skills). There is no build, no runtime, no server.
+A **Claude Code plugin** carrying one skill. `.claude-plugin/` holds the
+plugin and marketplace manifests; `skills/automate-my-work/` is the skill:
+`SKILL.md`, `references/` loaded on demand by the model, `templates/`
+copied into the user's own automation folder. Installing = `claude plugin
+marketplace add inno3759/automate-my-work && claude plugin install
+automate-my-work@inno3759`; Claude Desktop (no plugins) gets the skill
+folder as a ZIP upload. There is no build, no runtime, no server.
 
 When active, the skill makes Claude behave as an **automation engineer for
 people who do not program**: it maps their working day, proposes what a
@@ -55,16 +57,17 @@ Consequences baked into every file:
 ## 4. Architecture — file by file
 
 ```
-automate-my-work/
-├── SKILL.md                  entry point; the workflow Claude follows (official guidance: under 500 lines)
+automate-my-work/                 (plugin root)
+├── .claude-plugin/           plugin.json (name, version, license) + marketplace.json (this repo is its own marketplace `inno3759`, source "./")
+├── evals/                    `claude plugin eval .` cases: 3 trigger phrasings that must fire the skill + 1 unrelated prompt that must not
 ├── README.md                 two audiences: humans (top) + the installing agent (collapsible)
 ├── CLAUDE.md                 this file
 ├── LICENSE                   MIT
-├── VERSION                   YYYY.M.D release stamp (semver); ZIP installs compare it with GitHub to detect updates
-├── .claude-plugin/           plugin.json (name, version, license) + marketplace.json (this repo is its own marketplace `inno3759`, source "./")
-├── evals/                    `claude plugin eval .` cases: 3 trigger phrasings that must fire the skill + 1 unrelated prompt that must not
-├── .gitignore                __pycache__, .env, data/, logs/
-├── references/               loaded on demand; each is self-contained
+├── .gitignore                __pycache__, .env, data/, logs/, evals/results/
+└── skills/automate-my-work/  the skill
+    ├── SKILL.md              entry point; the workflow Claude follows (official guidance: under 500 lines)
+    ├── VERSION               YYYY.M.D release stamp (semver); Desktop ZIP installs compare it with GitHub to detect updates
+    ├── references/               loaded on demand; each is self-contained
 │   ├── setup.md              probe commands per OS → the nudge → install table → verify → project folder layout → keep the skill itself updated
 │   ├── audit.md              existing automations: read/run first, 19-row shortcut checklist, rank risk×frequency÷effort, one fix at a time, same-input-same-output proof
 │   ├── discovery.md          5-question interview, Playwright recording, machine inspection, opportunity map, 5-line spec
@@ -90,7 +93,7 @@ automate-my-work/
 
 ### How the workflow runs (SKILL.md)
 -1. **Triage** — any build/get/check/fetch request touching a site, app, sheet or mailbox: do it, then (if there is a request behind the clicks AND it will recur) offer the self-running version in one line, once. Accepted → step 0 with mini discovery. The user will not say "automate" or "scraping"; the skill must notice.
-0. **Capability check + nudge** — first, once per session, check whether the skill itself has updates (`git fetch`/`log HEAD..@{u}`, or `VERSION` vs GitHub for ZIP installs) and offer them in one line; never pull silently or over local edits (`setup.md` §"Keep the skill itself up to date"). Then probe, say what each missing tool unlocks, install, verify. Mandatory, every time.
+0. **Capability check + nudge** — first, once per session, check whether the plugin itself has updates (`claude plugin update`, or `VERSION` vs GitHub for Desktop ZIP uploads) and offer them in one line; never pull silently or over local edits (`setup.md` §"Keep the skill itself up to date"). Then probe, say what each missing tool unlocks, install, verify. Mandatory, every time.
 0b. **Audit** — they already have a script/macro/flow (or one is found on the machine): read and run it once, walk `audit.md`'s checklist, show ≤ 5 findings in their words, fix one at a time with their yes, prove same input → same output. Working code is the asset; no rewrites for style.
 1. **Discovery** — interview → record one real pass → inspect the machine → opportunity map (ranked by minutes saved × determinism, max 5, at least one unrequested) → 5-line spec agreed with the user. "Impossible" walls → `unblockers.md`.
 2. **Observe** — HAR → the request behind each click → replay with curl → strip headers → learn what the session is bound to → decision rule (HTTP script / userscript / extension / Playwright).
@@ -100,7 +103,7 @@ automate-my-work/
 5. **Handoff** — README in their words; real run together; second run = 0 new; break it once on purpose.
 
 ### Design decisions worth knowing
-- **Repo root = skill root.** Chosen so install is one `git clone` into the skills folder. Do not nest the skill in a subfolder.
+- **Plugin layout, one skill.** Root holds the manifests and evals; the skill lives in `skills/automate-my-work/` so a Desktop user can zip that one folder. Install is the plugin, never a bare clone into `~/.claude/skills/`.
 - **Violentmonkey over Tampermonkey** (open source, same API, all browsers). Use Tampermonkey if already installed.
 - **uv over python.org/pip.** One command, no PATH prompts, per-project venv, `uv run` everywhere. Never `pip install`.
 - **Tkinter for GUIs.** Zero dependencies; NiceGUI only when the user is in a browser anyway.
@@ -116,7 +119,7 @@ automate-my-work/
 - **Each reference is self-contained** and can be read alone; cross-reference by file name and section (`gotchas.md §2`).
 - **Templates**: Python ≥ 3.12, type hints, `from __future__ import annotations`, docstring at the top saying how to install deps and run, `TODO` marks exactly what must be filled. They must compile without the optional deps installed (imports of playwright/mcp/fastapi/pyotp are fine at module level only in files whose sole purpose needs them).
 - **Prose**: rules stated as rules, one incident line for the "why". Tables over paragraphs. No site names, no personal names.
-- **Releases**: bump `VERSION`, `metadata.version` in the SKILL.md frontmatter and `version` in `.claude-plugin/plugin.json` (all equal; `YYYY.M.D`, semver so no leading zeros, `-2` for a second release the same day) in every commit that changes SKILL.md, references or templates — ZIP installs detect updates only through it.
+- **Releases**: bump `skills/automate-my-work/VERSION`, `metadata.version` in the SKILL.md frontmatter and `version` in `.claude-plugin/plugin.json` (all equal; `YYYY.M.D`, semver so no leading zeros, `-2` for a second release the same day) in every commit that changes SKILL.md, references or templates — ZIP installs detect updates only through it.
 - **Commits**: `feat|fix|docs: short description`. Author is the anonymous GitHub identity. No `.env` in this repo (the skill has no secrets); user automations get their own `.env` + `.env.example`.
 - **README** has two audiences; the collapsible "Instructions for the agent" must always match SKILL.md step 0 and the install paths.
 
@@ -124,9 +127,9 @@ automate-my-work/
 
 Before every commit:
 ```bash
-claude plugin validate . && grep -q "$(cat VERSION)" SKILL.md .claude-plugin/plugin.json && echo versions ok
-python3 -m py_compile templates/*.py && rm -rf templates/__pycache__
-node -e "const fs=require('fs');for(const f of ['templates/userscript.user.js','templates/extension/background.js','templates/extension/content.js'])new Function(fs.readFileSync(f,'utf8'));JSON.parse(fs.readFileSync('templates/extension/manifest.json'));console.log('js ok')"
+claude plugin validate . && V=$(cat skills/automate-my-work/VERSION) && grep -q "$V" skills/automate-my-work/SKILL.md && grep -q "$V" .claude-plugin/plugin.json && echo "versions ok $V"
+python3 -m py_compile skills/automate-my-work/templates/*.py && rm -rf skills/automate-my-work/templates/__pycache__
+node -e "const fs=require('fs');const t='skills/automate-my-work/templates/';for(const f of [t+'userscript.user.js',t+'extension/background.js',t+'extension/content.js'])new Function(fs.readFileSync(f,'utf8'));JSON.parse(fs.readFileSync(t+'extension/manifest.json'));console.log('js ok')"
 grep -rnoIE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}|https?://[^ )]+' . | grep -vE 'example\.com|127\.0\.0\.1|astral\.sh|nodesource|apple\.com|api\.telegram|githubusercontent\.com/inno3759/automate-my-work|github\.com/inno3759/automate-my-work' ; echo "identity scan: e-mails/links above must be empty; also grep your own name, domains and IPs from a list kept OUTSIDE the repo"
 ```
 Trigger test: `claude plugin eval .` runs `evals/` (3 phrasings that must fire the skill, 1 unrelated prompt that must not) against a no-plugin baseline; a failing `skill-fired` grader means the description lost a trigger phrase. Costs real model runs; run it before a release, not on every edit.
@@ -137,27 +140,27 @@ step 0 (does the nudge read naturally? did the install succeed?), step 1
 (did the opportunity map surprise them?), and the handoff (can they run it
 alone?). Fix what confused them before anything else.
 
-Live reload: `~/.claude/skills/automate-my-work` is a symlink to this repo
-on the dev machine; SKILL.md changes need a new Claude session to be
-picked up.
+Live reload on the dev machine: `~/.claude/skills/automate-my-work` is a
+symlink to this repo, which Claude Code loads as the plugin
+`automate-my-work@skills-dir` (a folder with `.claude-plugin/plugin.json`
+under a skills directory). Edits need a new session to be picked up. Do
+not also install it from the marketplace on this machine: two copies of
+the same plugin name.
 
 ## 7. Distribution
 
-- Install paths: marketplace (`claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759`, updates via `claude plugin update`), git clone into `~/.claude/skills/` (loads as `automate-my-work@skills-dir`; slash name becomes `/automate-my-work:automate-my-work`, model invocation unchanged), or ZIP upload for Claude Desktop.
+- Install paths: **plugin** (`claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759`, updates via `claude plugin update`; slash name `/automate-my-work:automate-my-work`, model invocation by description) or, for Claude Desktop only, a ZIP of `skills/automate-my-work/` uploaded in Settings → Capabilities → Skills. The bare git-clone-as-skill path was removed on 2026-09-18.
 - GitHub: `inno3759/automate-my-work`, **public** since 2026-09-18, single-commit
   history (recreated after an identity scan). Never push without the scan;
   author is always the anonymous `inno3759` noreply identity; no AI
   attribution trailers.
 - Users install by pasting the README's one-line prompt into their Claude.
-  Claude Code: clone into `~/.claude/skills/`. Claude Desktop / claude.ai:
-  ZIP upload in Settings → Capabilities → Skills (path to verify — see §9).
-- Versioning: bump nothing yet; when public, tag releases (`v1.0.0`) so the
-  ZIP link in the README is stable.
+- Versioning: `version` in `plugin.json` pins what marketplace users receive; bump it (and the two mirrors) on every release commit, or `claude plugin update` delivers nothing.
 
 ## 8. Roadmap (not implemented)
 
 - pt-BR README (the primary audience is Brazilian; the agent block can stay English).
-- `install.sh` / `install.ps1` one-liners for people without git.
+- GitHub release asset: `automate-my-work-skill.zip` (just `skills/automate-my-work/`) so Desktop users skip the extract-and-rezip step.
 - A worked example folder (`examples/`) showing one finished automation end to end: recording → digest → job → timer → README.
 - Windows-specific: hidden console wrapper (`wscript` VBS) in `service/`; pythonw shortcut recipe with icon.
 - OCR template (`ocr.py`: tesseract + cache), spreadsheet writer template (`openpyxl` atomic write), IMAP/Graph mail fetch template.
