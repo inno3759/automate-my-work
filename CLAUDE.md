@@ -9,10 +9,11 @@ to change it safely, and where it stands.
 A **Claude Code plugin** carrying one skill. `.claude-plugin/` holds the
 plugin and marketplace manifests; `skills/automate-my-work/` is the skill:
 `SKILL.md`, `references/` loaded on demand by the model, `templates/`
-copied into the user's own automation folder. Installing = `claude plugin
-marketplace add inno3759/automate-my-work && claude plugin install
-automate-my-work@inno3759`; Claude Desktop (no plugins) gets the skill
-folder as a ZIP upload. There is no build, no runtime, no server.
+copied into the user's own automation folder. Installing: Claude Desktop
+(Cowork) users add the repo as a marketplace in **Customize → Plugins**
+and click Install; Claude Code users run `claude plugin marketplace add
+inno3759/automate-my-work && claude plugin install
+automate-my-work@inno3759`. There is no build, no runtime, no server.
 
 When active, the skill makes Claude behave as an **automation engineer for
 people who do not program**: it maps their working day, proposes what a
@@ -66,7 +67,7 @@ automate-my-work/                 (plugin root)
 ├── .gitignore                __pycache__, .env, data/, logs/, evals/results/
 └── skills/automate-my-work/  the skill
     ├── SKILL.md              entry point; the workflow Claude follows (official guidance: under 500 lines)
-    ├── VERSION               YYYY.M.D release stamp (semver); Desktop ZIP installs compare it with GitHub to detect updates
+    ├── VERSION               YYYY.M.D release stamp (semver), mirrored in SKILL.md metadata and plugin.json; compared with GitHub when no plugin CLI exists
     ├── references/               loaded on demand; each is self-contained
 │   ├── setup.md              probe commands per OS → the nudge → install table → verify → project folder layout → keep the skill itself updated
 │   ├── audit.md              existing automations: read/run first, 19-row shortcut checklist, rank risk×frequency÷effort, one fix at a time, same-input-same-output proof
@@ -93,7 +94,7 @@ automate-my-work/                 (plugin root)
 
 ### How the workflow runs (SKILL.md)
 -1. **Triage** — any build/get/check/fetch request touching a site, app, sheet or mailbox: do it, then (if there is a request behind the clicks AND it will recur) offer the self-running version in one line, once. Accepted → step 0 with mini discovery. The user will not say "automate" or "scraping"; the skill must notice.
-0. **Capability check + nudge** — first, once per session, check whether the plugin itself has updates (`claude plugin update`, or `VERSION` vs GitHub for Desktop ZIP uploads) and offer them in one line; never pull silently or over local edits (`setup.md` §"Keep the skill itself up to date"). Then probe, say what each missing tool unlocks, install, verify. Mandatory, every time.
+0. **Capability check + nudge** — first, once per session, check whether the plugin itself has updates (Claude Code: `claude plugin update`; Desktop: the app checks, Claude names the Customize → Plugins → Update clicks) and offer them in one line; never pull silently or over local edits (`setup.md` §"Keep the skill itself up to date"). Then probe, say what each missing tool unlocks, install, verify. Mandatory, every time.
 0b. **Audit** — they already have a script/macro/flow (or one is found on the machine): read and run it once, walk `audit.md`'s checklist, show ≤ 5 findings in their words, fix one at a time with their yes, prove same input → same output. Working code is the asset; no rewrites for style.
 1. **Discovery** — interview → record one real pass → inspect the machine → opportunity map (ranked by minutes saved × determinism, max 5, at least one unrequested) → 5-line spec agreed with the user. "Impossible" walls → `unblockers.md`.
 2. **Observe** — HAR → the request behind each click → replay with curl → strip headers → learn what the session is bound to → decision rule (HTTP script / userscript / extension / Playwright).
@@ -103,7 +104,7 @@ automate-my-work/                 (plugin root)
 5. **Handoff** — README in their words; real run together; second run = 0 new; break it once on purpose.
 
 ### Design decisions worth knowing
-- **Plugin layout, one skill.** Root holds the manifests and evals; the skill lives in `skills/automate-my-work/` so a Desktop user can zip that one folder. Install is the plugin, never a bare clone into `~/.claude/skills/`.
+- **Plugin layout, one skill.** Root holds the manifests and evals; the skill lives in `skills/automate-my-work/`. The repo is its own marketplace (`marketplace.json`, source `./`), which is exactly what Claude Desktop's **Add marketplace** and Claude Code's `plugin marketplace add` consume. Install is the plugin, never a bare clone into `~/.claude/skills/` and never a skill ZIP upload.
 - **Violentmonkey over Tampermonkey** (open source, same API, all browsers). Use Tampermonkey if already installed.
 - **uv over python.org/pip.** One command, no PATH prompts, per-project venv, `uv run` everywhere. Never `pip install`.
 - **Tkinter for GUIs.** Zero dependencies; NiceGUI only when the user is in a browser anyway.
@@ -149,7 +150,7 @@ the same plugin name.
 
 ## 7. Distribution
 
-- Install paths: **plugin** (`claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759`, updates via `claude plugin update`; slash name `/automate-my-work:automate-my-work`, model invocation by description) or, for Claude Desktop only, a ZIP of `skills/automate-my-work/` uploaded in Settings → Capabilities → Skills. The bare git-clone-as-skill path was removed on 2026-09-18.
+- Install paths, both plugin: **Claude Desktop (Cowork)** — Customize → Plugins → Add marketplace → `inno3759/automate-my-work` → Install (docs: claude.com/docs/cowork/guide/plugins; package limit 200 MB uncompressed, 5,000 files); **Claude Code** — `claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759`, updates via `claude plugin update`. Slash name `/automate-my-work:automate-my-work`; model invocation by description. Bare git-clone-as-skill and skill-ZIP-upload paths were removed on 2026-09-18.
 - GitHub: `inno3759/automate-my-work`, **public** since 2026-09-18, single-commit
   history (recreated after an identity scan). Never push without the scan;
   author is always the anonymous `inno3759` noreply identity; no AI
@@ -160,7 +161,7 @@ the same plugin name.
 ## 8. Roadmap (not implemented)
 
 - pt-BR README (the primary audience is Brazilian; the agent block can stay English).
-- GitHub release asset: `automate-my-work-skill.zip` (just `skills/automate-my-work/`) so Desktop users skip the extract-and-rezip step.
+- Submit to Anthropic's official plugin directory (claude.com/docs/plugins/submit) so Desktop users find it under **Browse plugins** without adding a marketplace.
 - A worked example folder (`examples/`) showing one finished automation end to end: recording → digest → job → timer → README.
 - Windows-specific: hidden console wrapper (`wscript` VBS) in `service/`; pythonw shortcut recipe with icon.
 - OCR template (`ocr.py`: tesseract + cache), spreadsheet writer template (`openpyxl` atomic write), IMAP/Graph mail fetch template.
@@ -170,9 +171,10 @@ the same plugin name.
 ## 9. State (update this block every session)
 
 - **2026-09-12 — v1 created.** SKILL.md + 9 references + 14 templates, README (human + agent), MIT. Templates compile; identity scan clean. **Never exercised with a real user.** First real test is the next milestone; expect the nudge wording and the discovery questions to change after it.
-- Open decisions (user's): pt-BR README.
+- **2026-09-18 — plugin.** Converted to a Claude Code / Cowork plugin: `.claude-plugin/` manifests, repo is its own marketplace `inno3759`, skill moved to `skills/automate-my-work/`. Added audit mode (`audit.md`, step 0b), self-update check (step 0), evals (4 cases; 2 run, both 1.00), trimmed description, `license`/`metadata.version`. Install paths are Desktop **Customize → Plugins → Add marketplace** and `claude plugin install`; bare skill clone and skill-ZIP upload removed. Not yet pushed at time of writing.
+- Open decisions (user's): pt-BR README; submit to the official plugin directory.
 - Unverified claims to check on first real use:
-  - Claude Desktop skill upload path in the README (Settings → Capabilities → Skills).
+  - Claude Desktop **Add marketplace** flow with this repo (plugin source `./`, single skill at `skills/automate-my-work/`): confirm the plugin lists, installs and fires on a real Desktop (Cowork) install.
   - `record_har_content="embed"` and persistent profile paths on Windows.
   - `pyzbar` on Windows needs the zbar DLL; fallback already documented (user pastes the `otpauth://` text or the manual key).
   - `launchctl bootstrap` syntax on current macOS; `-lc` so PATH includes uv.

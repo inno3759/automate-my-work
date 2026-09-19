@@ -131,9 +131,9 @@ official settings; explain the trade, they decide and apply it.
 
 **Is this plugin itself current?** Once per session, before the probe:
 `references/setup.md` §"Keep the plugin itself up to date". Claude Code
-→ `claude plugin update`; Claude Desktop ZIP → compare `VERSION` with the
-one on GitHub. Pending update → one line with what changed, ask, then
-update (or the two clicks to re-upload). Never silently; never over the
+→ `claude plugin update`; Claude Desktop → the app checks the marketplace
+itself; you name the two clicks (Customize → Plugins → Update). Pending
+update → one line with what changed, ask, then update. Never silently; never over the
 maintainer's local edits; offline → skip without comment.
 
 Install order (only what the chosen solution needs): **MCP that gives

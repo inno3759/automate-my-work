@@ -167,13 +167,14 @@ python-dotenv` etc.). One folder per automation; never mix.
 
 ## Keep the plugin itself up to date (once per session, step 0)
 
-Two install shapes exist; detect which from the folder this `SKILL.md` was
-read from (`${CLAUDE_SKILL_DIR}`; its parent's parent is the plugin root).
+Two install shapes exist. Detect which from what you have: a shell with the
+`claude` CLI → Claude Code; no shell, plugin installed through the app's
+**Customize → Plugins** page → Claude Desktop (Cowork).
 
-| Shape | Check (silent, ≤ 3 s, skip if offline) | Update (only after the user says yes) |
+| Shape | Check (silent, ≤ 3 s, skip if offline or no fetch tool) | Update (only after the user says yes) |
 |-|-|-|
-| **Claude Code plugin** (`${CLAUDE_PLUGIN_ROOT}` is set, or `claude plugin list` shows `automate-my-work@…`) | `claude plugin list` shows the installed version; compare with `curl -fsSL https://raw.githubusercontent.com/inno3759/automate-my-work/main/skills/automate-my-work/VERSION` (PowerShell: `irm <url>`) | `claude plugin update automate-my-work@inno3759`. A `@skills-dir` install is the maintainer's own clone: `git pull --ff-only` there, never over local edits |
-| **Claude Desktop ZIP upload** (no `claude` CLI) | compare the folder's `VERSION` with the same URL | You cannot do it for them: "download the ZIP again, zip the `skills/automate-my-work` folder, upload it in Settings → Capabilities → Skills" — two clicks and a drag |
+| **Claude Code** (`${CLAUDE_PLUGIN_ROOT}` set, `claude plugin list` shows `automate-my-work@…`) | `claude plugin list` shows the installed version; compare with `curl -fsSL https://raw.githubusercontent.com/inno3759/automate-my-work/main/skills/automate-my-work/VERSION` (PowerShell: `irm <url>`) | `claude plugin update automate-my-work@inno3759`. A `@skills-dir` install is the maintainer's own clone: `git pull --ff-only` there, never over local edits |
+| **Claude Desktop (Cowork)** | The app checks the marketplace itself and warns before overwriting local edits. If you can fetch URLs, compare the `VERSION` file you were loaded with against the URL above; otherwise skip | You cannot click for them. One line: "Customize → Plugins → **Update** on the *inno3759* marketplace, then a new conversation" |
 
 Rules:
 - **Never update silently.** Show the pending lines (or "version X → Y")

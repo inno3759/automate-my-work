@@ -2,20 +2,31 @@
 
 # 🛠️ automate-my-work
 
-**A Claude skill that turns a non-technical person's repetitive daily work into automation that runs by itself — no LLM in the loop.**
+**A Claude plugin that turns a non-technical person's repetitive daily work into automation that runs by itself — no LLM in the loop.**
 
 Buttons on the pages you already use · scripts that run every morning · tiny apps with one big button · and Claude learns what *your* day looks like before proposing anything.
 
-[Install](#-install-paste-this-to-claude) · [What it does](#-what-it-does) · [How it thinks](#-how-it-thinks) · [What's inside](#-whats-inside) · [FAQ](#-faq)
+[Install](#-install-3-clicks-in-claude-desktop) · [What it does](#-what-it-does) · [How it thinks](#-how-it-thinks) · [What's inside](#-whats-inside) · [FAQ](#-faq)
 
 </div>
 
 ---
 
-## 🤖 Install (paste this to Claude)
+## 📦 Install (3 clicks in Claude Desktop)
 
-Copy the block below and send it to Claude (Claude Code, Claude Desktop with computer access, or any agent that can run commands):
+1. Open **Customize** in the sidebar → **Plugins** → **Add marketplace**.
+2. Paste `inno3759/automate-my-work` and confirm.
+3. Find **automate-my-work** in that marketplace → **Install**. Start a new conversation.
 
+Updates: Claude checks for them and asks you at the start of a session; or open **Customize → Plugins** and click **Update** on the marketplace.
+
+**Claude Code** (terminal, VS Code, or the Claude Code tab in the desktop app):
+```bash
+claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759
+```
+Updates: `claude plugin update automate-my-work@inno3759`.
+
+Or paste this to any Claude that can run commands:
 ```text
 Install the Claude plugin from https://github.com/inno3759/automate-my-work
 and then start it: look at what I do every day and propose what you could automate.
@@ -24,13 +35,9 @@ and then start it: look at what I do every day and propose what you could automa
 <details>
 <summary><b>Instructions for the agent</b> (Claude: read this section and do it, do not ask the user to)</summary>
 
-1. **Claude Code** (CLI / VS Code / desktop app) — install the plugin; updates then come through `claude plugin update`:
-   ```bash
-   claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759
-   ```
-   Same command in PowerShell. Verify with `claude plugin list` (shows `automate-my-work@inno3759`), then start a new session.
-2. **Claude Desktop / claude.ai** (no plugin support there — custom skill upload): download the repository ZIP (`Code → Download ZIP`), extract it, zip the folder `skills/automate-my-work` (it has `SKILL.md` at its root) and upload that in *Settings → Capabilities → Skills*.
-3. **Updating later**: the plugin checks for updates itself at the start of each session and asks before doing anything. To force it: `claude plugin update automate-my-work@inno3759`. Desktop uploads: repeat step 2 (the `VERSION` file inside the folder says which release you have).
+1. **Claude Code** (CLI / VS Code / desktop app tab): run `claude plugin marketplace add inno3759/automate-my-work && claude plugin install automate-my-work@inno3759` (same in PowerShell). Verify with `claude plugin list`, then tell the user to start a new session.
+2. **Claude Desktop (Cowork) or claude.ai**: you cannot click for the user. Give the three steps above in one line: Customize → Plugins → Add marketplace → paste `inno3759/automate-my-work` → Install **automate-my-work** → new conversation.
+3. **Updating later**: the plugin checks for updates itself at the start of each session and asks before doing anything. Claude Code: `claude plugin update automate-my-work@inno3759`. Desktop: Customize → Plugins → **Update** on the marketplace.
 4. Start it: invoke the skill `automate-my-work`. Its first step is a **capability check** — it will probe the machine and tell the user, in plain words, what installing uv/Python, Node, Playwright, Violentmonkey or an MCP would unlock, and offer to install it. Do not skip that step; do not skip discovery.
 5. Tell the user in one line: "Installed. I'll now ask five short questions about your day."
 
