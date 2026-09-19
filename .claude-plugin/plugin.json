@@ -1,10 +1,20 @@
 {
   "name": "automate-my-work",
+  "displayName": "Automate My Work",
   "version": "2026.9.18",
   "description": "Turns a non-technical person's repetitive daily work into automation that runs without an LLM in the loop. Audits automations they already have.",
-  "author": { "name": "inno3759" },
+  "author": {
+    "name": "inno3759"
+  },
   "homepage": "https://github.com/inno3759/automate-my-work",
   "repository": "https://github.com/inno3759/automate-my-work",
   "license": "MIT",
-  "keywords": ["automation", "scraping", "userscript", "scheduling", "no-code", "rpa"]
+  "keywords": [
+    "automation",
+    "scraping",
+    "userscript",
+    "scheduling",
+    "no-code",
+    "rpa"
+  ]
 }
