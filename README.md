@@ -2,7 +2,7 @@
 
 # 🛠️ automate-my-work
 
-**A Claude plugin that turns a non-technical person's repetitive daily work into automation that runs by itself — no LLM in the loop.**
+**A Claude plugin that turns a non-technical person's repetitive daily work into automation that runs by itself — no AI needed while it runs, no monthly cost.**
 
 Buttons on the pages you already use · scripts that run every morning · tiny apps with one big button · and Claude learns what *your* day looks like before proposing anything.
 
@@ -14,11 +14,24 @@ Buttons on the pages you already use · scripts that run every morning · tiny a
 
 ## 📦 Install (3 clicks in Claude Desktop)
 
-1. Open **Customize** in the sidebar → **Plugins** → **Add marketplace**.
-2. Paste `inno3759/automate-my-work` and confirm.
-3. Find **automate-my-work** in that marketplace → **Install**. Start a new conversation.
+Works in the **Claude Desktop app** (Windows or Mac) on Pro, Max, Team or Enterprise plans.
 
-Updates: Claude checks for them and asks you at the start of a session; or open **Customize → Plugins** and click **Update** on the marketplace.
+1. In the left sidebar click **Customize**, then **Plugins**, then **Add marketplace**.
+2. In the box that opens, type `inno3759/automate-my-work` and press **Add**.
+3. The marketplace **inno3759** appears with one plugin, **Automate My Work**. Click **Install**.
+
+Then open a new conversation and type:
+
+```text
+Look at what I do every day and propose what you could automate.
+```
+
+Claude will first check what is on your computer, tell you what it can and cannot do yet, and then ask five short questions about your day.
+
+**Updates**: Claude tells you at the start of a conversation when there is a new version and asks before installing it. You can also open **Customize → Plugins** and click **Update** on the marketplace.
+
+<details>
+<summary><b>Other ways to install</b> (Claude Code terminal, or letting Claude install it)</summary>
 
 **Claude Code** (terminal, VS Code, or the Claude Code tab in the desktop app):
 ```bash
@@ -26,11 +39,12 @@ claude plugin marketplace add inno3759/automate-my-work && claude plugin install
 ```
 Updates: `claude plugin update automate-my-work@inno3759`.
 
-Or paste this to any Claude that can run commands:
+**Let Claude do it** — paste this to any Claude that can run commands:
 ```text
 Install the Claude plugin from https://github.com/inno3759/automate-my-work
 and then start it: look at what I do every day and propose what you could automate.
 ```
+</details>
 
 <details>
 <summary><b>Instructions for the agent</b> (Claude: read this section and do it, do not ask the user to)</summary>
@@ -41,7 +55,7 @@ and then start it: look at what I do every day and propose what you could automa
 4. Start it: invoke the skill `automate-my-work`. Its first step is a **capability check** — it will probe the machine and tell the user, in plain words, what installing uv/Python, Node, Playwright, Violentmonkey or an MCP would unlock, and offer to install it. Do not skip that step; do not skip discovery.
 5. Tell the user in one line: "Installed. I'll now ask five short questions about your day."
 
-Requirements: none to install the skill. The skill installs what each automation needs (uv → Python, Node, Playwright, Violentmonkey) only when needed, and asks first.
+Requirements: none to install the plugin. It installs what each automation needs (uv → Python, Node, Playwright, Violentmonkey) only when needed, and asks first.
 </details>
 
 ---
