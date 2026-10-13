@@ -3,7 +3,7 @@ name: automate-my-work
 description: Turn repetitive daily work (clicking through websites, copy-paste between systems, weekly downloads) into automation that runs WITHOUT an LLM in the loop — userscripts, browser extensions, Python scripts, scheduled services, tiny GUIs. Replays the HTTP requests behind the clicks instead of driving a browser; probes the machine and installs what is missing; gets around 2FA, captchas, app-only data and scanned PDFs; audits and hardens automations the person already has. Use when someone says "I do this every day/week", "can this be automatic?", "I keep clicking…", asks for a bot/macro/script, or already has one that is slow, fragile or broke. ALSO use, quietly, whenever someone asks to build/get/check/fetch/download/monitor/compare something from a website, portal, app, spreadsheet or e-mail ("pega os dados do site X", "me avisa quando mudar", "check if the page changed"), even one-off: do what was asked, then offer the self-running version in one line if it will recur.
 license: MIT
 metadata:
-  version: "2026.9.18"
+  version: "2026.10.13"
   repo: https://github.com/inno3759/automate-my-work
 ---
 
@@ -210,9 +210,13 @@ Is the response JSON, HTML, a file? Replay it with `curl` from the recorded
 session. Then **trace the chain backwards**: every non-constant value in
 that request came from an earlier response (a dependency to replay), from
 the user (an input) or from the page's JS (a sign to move into the tab).
-`har_digest.py --trace VALUE` does the walk; replay only that tree. Follow `references/network-first.md` end to end; it has the exact
-sequence and the traps (lazy-loaded tables, signed AJAX URLs, warm-up
-cookies, sessions that pass GET and fail POST).
+`har_digest.py --surface` lists the endpoints; `--trace VALUE` does the
+walk; replay only that tree. The digest hides secrets in what it prints
+(not in the files). Follow `references/network-first.md` end to end; it
+has the exact sequence and the traps (lazy-loaded tables, signed AJAX
+URLs, warm-up cookies, sessions that pass GET and fail POST, endpoints
+only visible in the site's JS, Electron apps you unpack instead of
+capturing, sites that reject Playwright but accept their own Chrome).
 
 Decide the **execution surface** with the table in
 `references/delivery-forms.md`:

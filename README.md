@@ -103,8 +103,8 @@ automate-my-work/
 │   ├── composability.md         core/surfaces, local API, MCP server, LLM-ready output
 │   └── handoff.md               README template + the walkthrough
 └── templates/
-    ├── record_session.py        Playwright: HAR + storage state + screenshots
-    ├── har_digest.py            "which request has the value I saw on screen?"
+    ├── record_session.py        Playwright: HAR + storage state + screenshots (or attach to your own Chrome)
+    ├── har_digest.py            "which request has the value I saw on screen?" / "which endpoints exist?" — secrets hidden in output
     ├── fetch_job.py             unattended HTTP job: 3 failure bins, state, lock, notify
     ├── userscript.user.js       one button on the page (Violentmonkey/Tampermonkey)
     ├── extension/               Manifest V3: alarms + storage + content script

@@ -58,6 +58,29 @@ Order of attempts:
    connections, fingerprint challenges), say so and stop at 3. Do not
    escalate through fingerprint spoofing.
 
+## "The site knows it's a robot" (works by hand, logs out / challenges the script)
+
+Playwright's Chromium announces itself (automation flags, a test build,
+no history). Some sites answer with a challenge page, an instant logout or
+a silently empty table. Before giving up or moving into a userscript:
+
+1. **Use their real browser, attached, not launched.** The user starts
+   Chrome/Edge once with `--remote-debugging-port=9222` and a dedicated
+   profile folder (Chrome 136+ refuses debugging on the default profile),
+   logs in by hand. `record_session.py --cdp http://127.0.0.1:9222` records
+   the HAR from that window; later, if the decision rule ends in
+   "browser", Playwright `connect_over_cdp` drives the same window. Put
+   the start command in a shortcut called "Browser for automations".
+   Nothing is spoofed: same binary, same profile, same login the human
+   uses — the script only listens or clicks. The browser must be open when
+   the task runs (fine for "while I work" jobs; not for a 3 a.m. schedule).
+2. If HTTP replay from that session still fails but the tab works →
+   **userscript in the tab** (delivery-forms.md); the browser owns the
+   session, the script just fires `fetch()`.
+3. If even the attached browser is challenged, the site is fingerprinting
+   the *profile* or the *IP*: say so and stop. No spoofing, no residential
+   proxies.
+
 ## "Claude cannot even open the page" (403, "unable to fetch", bot wall)
 
 This wall is Claude's, not the user's, and it is the most common one when
@@ -99,15 +122,55 @@ user's money, stopping at 1 wastes their time.
 
 ## "It only works inside the app / desktop program"
 
-- Most desktop apps talk to a server: capture with a proxy (mitmproxy,
-  `HTTP_PROXY`, or Wireshark for non-HTTP) → replay. Ask before doing
-  this on a work machine.
+- **Is it Electron?** (a `resources/app.asar` file next to the .exe:
+  Slack, Discord, Notion, many ERP/court-filing clients). Then it is a
+  web page in a box: unpack the asar and read its JavaScript — the API
+  URLs, header names and login flow are in plain text, no capture, no
+  certificate. Recipe: network-first.md §1b first row. Try this before
+  anything below; it takes 2 minutes.
+- Most desktop apps talk to a server: capture below the app (mitmproxy +
+  its CA cert; Wireshark for non-HTTP) → replay it like any HTTP job. Full
+  method and the three cases: network-first.md §1b. If the app is
+  certificate-pinned it won't go through the proxy — fall back to the two
+  bullets below. Ask before capturing on a work machine.
 - Many store data locally: SQLite/Access/CSV under `%APPDATA%`/
   `~/Library/Application Support` → read the file directly (read-only).
 - Office apps: automate with their own object model (`win32com` Excel/
   Outlook, AppleScript/JXA for Mail/Numbers) — no clicking.
 - Truly click-only legacy apps: `pyautogui` + image matching, last resort;
   label it fragile; keep the window layout fixed.
+
+## "It's an old green-screen / DOS / mainframe app" (COBOL, 3270, AS/400)
+
+The systems users are surest are untouchable — "it's from the 90s", "the
+one nobody can change". They are often the **easiest to drive reliably**: a
+terminal is a fixed character grid, not a shifting web page. It is a
+character stream, so this is terminal scripting, not the HTTP replay of the
+rest of this skill (network-first.md §1b routes here).
+
+What it is, and the tool:
+
+| Kind | Reach it with |
+|-|-|
+| IBM 3270 mainframe / 5250 AS-400 (green screen) | a scriptable emulator: **x3270/wc3270** scripting, **py3270**, or **s3270** piped — read fields at fixed row/col, send keys, read the next screen |
+| Telnet/SSH text menu (Unix TUI, old ERP) | **pexpect** (expect prompt → send → expect next), or **tmux send-keys** and capture the pane |
+| DOS program in an emulator/VM | no network, no clean file share → UI automation on the fixed text screen (`pyautogui` + OCR of the console), last resort; keep the window size fixed |
+| The app spools/prints or writes a flat file | **skip the app** — read the print/spool file or the fixed-width data file it produces; often the real data already sits as a flat file on a share |
+
+Rules:
+- **Read at fixed coordinates**, not by "find the text" — the grid's
+  row/col is stable across runs; wording drifts.
+- **Wait for the screen to settle** (a known field to appear) before
+  reading; the host sends the screen in pieces. Reading too early gives
+  half a screen — the terminal version of the AJAX empty-table trap
+  (gotchas §3).
+- One session, sequential; these hosts serialise you anyway. A dropped
+  connection is the blocked/retry bin (exit 1), never "no data".
+- Prefer the **flat file it reads or writes** over the screen when one
+  exists — fixed-width COBOL records (`struct`/column slices, a copybook
+  layout) are far more stable than any screen.
+- Their own login, their own access. Many shops forbid automated mainframe
+  logins — say so and let them check first.
 
 ## "It is a PDF / a scan / an image"
 

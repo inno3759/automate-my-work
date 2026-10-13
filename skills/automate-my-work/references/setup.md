@@ -38,6 +38,9 @@ Format, in the user's language, max 5 lines:
   - Playwright → "I can watch you do the task once and copy it" — 5 min
   - Violentmonkey → "a button on the page, no program to open" — 1 min
   - MCP Gmail/Calendar/Drive/Chrome → "I can act directly in X instead of you copy-pasting"
+  - mitmproxy / a scriptable terminal → "I can automate a desktop program
+    or an old green-screen system, not just websites" — offer only when the
+    task is actually one of those (network-first.md §1b)
 - Reassure: nothing changes in how the computer works; removable any time.
 
 Repeat the nudge later whenever a missing tool is the difference between a
@@ -128,6 +131,16 @@ the admin may forbid it.
 | Playwright (py) | `uv add playwright && uv run playwright install chromium` (inside the project) | same | same + `uv run playwright install-deps chromium` |
 | Violentmonkey | Open the store page in their browser: Chrome/Edge/Brave → chrome.google.com/webstore (search "Violentmonkey"); Firefox → addons.mozilla.org | same | same |
 | git | `winget install Git.Git` | `xcode-select --install` or `brew install git` | `sudo apt-get install -y git` |
+
+Situational — install only when the task hits it (Claude runs these to
+observe; the user never touches them):
+
+| Tool | When | Windows | macOS | Linux |
+|-|-|-|-|-|
+| mitmproxy | desktop/phone app over HTTPS (§1b) | `uv tool install mitmproxy` | same, or `brew install mitmproxy` | same |
+| Wireshark | non-HTTP / binary protocol (§1b) | `winget install WiresharkFoundation.Wireshark` | `brew install --cask wireshark` | `sudo apt-get install -y wireshark` |
+| x3270 / py3270 | IBM 3270 / AS-400 green screen | `wc3270` installer + `uv add py3270` | `brew install x3270 && uv add py3270` | `sudo apt-get install -y x3270 && uv add py3270` |
+| pexpect | telnet/SSH text menu | `uv add wexpect` (or use WSL) | `uv add pexpect` | `uv add pexpect` |
 
 Notes:
 - Prefer **uv** over python.org installers: one command, no PATH prompts,
